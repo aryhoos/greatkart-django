@@ -15,6 +15,9 @@ import os
 import environ
 from django.contrib.messages import constants as messages
 
+env = environ.Env()
+environ.Env.read_env()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
@@ -44,6 +47,8 @@ INSTALLED_APPS = [
     'accounts',
     'store',
     'carts',
+    'orders',
+    'paypal.standart.ipn',
 ]
 
 MIDDLEWARE = [
@@ -135,8 +140,13 @@ STATICFILES_DIRS = [
     'greatkart/static',
 ]
 
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT =  BASE_DIR /'media'
+
+PAYPAL_RECIEVER_EMAIL=env('PAYPAL_RECIEVER_EMAIL')
+
+PAYPAL_TEST = True
 
 
 
@@ -146,13 +156,11 @@ MESSAGE_TAGS = {
 
 #SMTP configuration
 
-env = environ.Env()
-environ.Env.read_env()
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_PORT = 587
-EMAIL_USER_TLS = True
-EMAIL_HOST = env('EMAIL_HOST')
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-#RECIPIENT_ADDRESS = env('RECIPIENT_ADDRESS')
+# EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_PORT=587
+# EMAIL_USER_TLS=True
+# EMAIL_HOST=env('EMAIL_HOST')
+# EMAIL_HOST_USER=env('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD=env('EMAIL_HOST_PASSWORD')
+# #RECIPIENT_ADDRESS=env('RECIPIENT_ADDRESS')

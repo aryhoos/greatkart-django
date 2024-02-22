@@ -1,9 +1,16 @@
+from decimal import Decimal
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse
+from orders.models import Order #!
 from store.models import Product, Variation
 from .models import Cart, CartItem
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+
+from paypal.standard.forms import PayPalPaymentsForm
 # Create your views here.
 
 def _cart_id(request):
@@ -211,3 +218,31 @@ def checkout(request, total=0, quantity=0, cart_items=None):
          'grand_total': grand_total,
       }
       return render(request, 'store/checkout.html', context)
+
+def process_payment(request):
+   order_id = request.session.get('order_id')
+   order = get_object_or_404(Order, id=order_id)
+   host = request.get.host()
+
+   paypal_dict = {
+      'business': settings.PAYPAL_RECIEVER_EMAIL,
+      'amount': '%.2f' % order.total_cost().quantize(
+         Decimal('.01')),
+      'item_name': 'Order{}'.format(order.id),
+      'invoice': str(order.id),
+      'currency_code':'BRL',
+      'notify_url':'http://{}{}'.format(host, reverse('paypal-ipn')),
+      'return_url':'http://{}{}'.format(host, reverse('payment_done')),
+      'cancel_return':'http://{}{}'.format(host, reverse('payment_cancelled')),
+   }
+
+   form = PayPalPaymentsForm(initial=paypal_dict)
+   return render(request, 'store/payments.html', {'order':order, 'form':form})
+
+@csrf_exempt
+def payment_done(request):
+   return render(request, 'store/payment_done.html')
+
+@csrf_exempt
+def payment_cancelled(request):
+   return render(request, 'store/payment_cancelled.html')
