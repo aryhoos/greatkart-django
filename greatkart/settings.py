@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'store',
     'carts',
     'orders',
-    'paypal.standart.ipn',
+    'paypal.standard.ipn',
 ]
 
 MIDDLEWARE = [
